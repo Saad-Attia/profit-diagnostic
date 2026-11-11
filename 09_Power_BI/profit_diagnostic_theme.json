@@ -1,0 +1,44 @@
+{
+  "name": "Profit Diagnostic",
+  "dataColors": ["#2A78D6", "#EB6834", "#1BAF7A", "#EDA100", "#E87BA4", "#008300", "#6250D6", "#E34948"],
+  "background": "#FCFCFB",
+  "foreground": "#0B0B0B",
+  "tableAccent": "#2A78D6",
+  "good": "#2A78D6",
+  "neutral": "#898781",
+  "bad": "#E34948",
+  "maximum": "#2A78D6",
+  "center": "#F0EFEC",
+  "minimum": "#E34948",
+  "textClasses": {
+    "callout": { "fontFace": "Segoe UI Semibold", "fontSize": 26, "color": "#0B0B0B" },
+    "title":   { "fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#0B0B0B" },
+    "header":  { "fontFace": "Segoe UI Semibold", "fontSize": 11, "color": "#0B0B0B" },
+    "label":   { "fontFace": "Segoe UI", "fontSize": 10, "color": "#52514E" }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FCFCFB" } }, "transparency": 0 }],
+        "border": [{ "show": false }],
+        "title": [{ "show": true, "fontColor": { "solid": { "color": "#0B0B0B" } }, "alignment": "left" }],
+        "valueAxis": [{ "gridlineColor": { "solid": { "color": "#E1E0D9" } }, "labelColor": { "solid": { "color": "#898781" } } }],
+        "categoryAxis": [{ "labelColor": { "solid": { "color": "#52514E" } } }]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#F9F9F7" } }, "transparency": 0 }]
+      }
+    },
+    "waterfallChart": {
+      "*": {
+        "sentimentColors": [{
+          "increaseFill": { "solid": { "color": "#2A78D6" } },
+          "decreaseFill": { "solid": { "color": "#E34948" } },
+          "totalFill":    { "solid": { "color": "#52514E" } }
+        }]
+      }
+    }
+  }
+}

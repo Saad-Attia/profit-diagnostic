@@ -1,0 +1,81 @@
+// =============================================================================
+// Pricing Simulator · DAX measures (paste each into the _Measures table)
+// Tables: Sales, Product (from Pricing_Simulator_Data.xlsx)
+// Parameters (created in Step 4 of the guide):
+//   'Price Floor'     DATATABLE with one column [Apply] = "Off" / "On"
+//   'Floor Margin'    numeric range 0–10, step 1   → measure [Floor Margin Value]
+//   'Discount Cap'    numeric range 0–40, step 5   → measure [Discount Cap Value]
+// Parameters hold whole percentage points (5 = 5%) so slider values are exact.
+// =============================================================================
+
+// ---------------------------------------------------------------- actual
+Actual Net Sales = SUM ( Sales[net_sales] )
+Actual COGS = SUM ( Sales[cogs] )
+Actual Gross Profit = SUM ( Sales[gross_profit] )
+Actual Margin % = DIVIDE ( [Actual Gross Profit], [Actual Net Sales] )
+
+// ---------------------------------------------------------------- levers
+Floor On = SELECTEDVALUE ( 'Price Floor'[Apply], "Off" ) = "On"
+Floor Margin = [Floor Margin Value] / 100
+Discount Cap = [Discount Cap Value] / 100
+
+// ---------------------------------------------------------------- simulated
+// Row by row: raise the unit price to the floor if it is below it, cap the
+// discount, and keep the stored net_sales when nothing changes on the row.
+Simulated Net Sales =
+VAR useFloor = [Floor On]
+VAR m = [Floor Margin]
+VAR cap = [Discount Cap]
+RETURN
+    SUMX (
+        Sales,
+        VAR floorPrice = DIVIDE ( Sales[unit_cost], 1 - m )
+        VAR newPrice =
+            IF ( useFloor && Sales[unit_price] < floorPrice, floorPrice, Sales[unit_price] )
+        VAR newDisc = MIN ( Sales[discount_pct], cap )
+        RETURN
+            IF (
+                newPrice = Sales[unit_price] && newDisc = Sales[discount_pct],
+                Sales[net_sales],
+                newPrice * Sales[qty] * ( 1 - newDisc )
+            )
+    )
+
+Simulated Gross Profit = [Simulated Net Sales] - [Actual COGS]
+Simulated Margin % = DIVIDE ( [Simulated Gross Profit], [Simulated Net Sales] )
+// ROUND removes floating-point noise (e.g. 9E-9) so unaffected models show exactly 0
+Profit Gain = ROUND ( [Simulated Gross Profit] - [Actual Gross Profit], 2 )
+Net Sales Change % = DIVIDE ( [Simulated Net Sales] - [Actual Net Sales], [Actual Net Sales] )
+
+// How many products get a higher price (the cost of the lever)
+Products Repriced =
+VAR m = [Floor Margin]
+RETURN
+    IF (
+        [Floor On],
+        COUNTROWS (
+            DISTINCT (
+                SELECTCOLUMNS (
+                    FILTER ( Sales, Sales[unit_price] < DIVIDE ( Sales[unit_cost], 1 - m ) ),
+                    "pk", Sales[product_key]
+                )
+            )
+        ) + 0,
+        0
+    )
+
+// ---------------------------------------------------------------- text
+Headline =
+"Gross profit moves from " & FORMAT ( [Actual Gross Profit], "$#,0" ) &
+" to " & FORMAT ( [Simulated Gross Profit], "$#,0" ) &
+"  (" & FORMAT ( [Profit Gain], "+$#,0;-$#,0;$0" ) & ")"
+
+Scenario Description =
+VAR floorText =
+    IF ( [Floor On],
+         "Price floor ON: no unit price below cost + " & FORMAT ( [Floor Margin], "0%" ) & " margin",
+         "Price floor OFF" )
+VAR capText =
+    IF ( [Discount Cap] >= 0.40, "no discount cap",
+         "discounts capped at " & FORMAT ( [Discount Cap], "0%" ) )
+RETURN floorText & " · " & capText & " · latest 12 months, volume held constant"

@@ -1,0 +1,13 @@
+id,check,result,decision
+1,One row per order line,"60,855 rows = 60,855 distinct order lines",Grain confirmed
+2,"Orders, SKUs, resellers, reps","3,796 orders | 250 SKUs (334 product keys) | 635 resellers | 17 reps","SKU, not ProductKey, is the product ID (ProductKey is Type 2)"
+3,Missing values in analysis columns,0 nulls,No imputation needed
+4,UnitPrice × Qty = ExtendedAmount,0 mismatches,Unit prices confirmed
+5,Extended × Discount% = DiscountAmount,0 mismatches,Unit prices confirmed
+6,Extended − Discount = SalesAmount,0 mismatches,Unit prices confirmed
+7,StandardCost × Qty = TotalProductCost,0 mismatches,Unit prices confirmed
+8,Impossible values,0 non-positive qty | 0 negative sales,None to remove
+9,Lines sold below standard cost,"21,829 of 60,855 (36%)",Not an error: main business question for Q1/Q3
+10,Month coverage,"2010-12 to 2013-11; missing: 2011-02, 2011-04, 2011-06",Compare Dec 2011–Nov 2012 (P0) with Dec 2012–Nov 2013 (P1)
+11,Brief: sales grew but profit didn't,"net sales +29.8%; gross profit 1,153,445 → -673,727",Brief confirmed by data
+12,Unit price vs dealer price,undiscounted lines invoice at dealer price (60% of list); promoted lines invoice BELOW dealer price and then get the line discount on top,Promotion reduces price twice: raise with client; model as waterfall step
